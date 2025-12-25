@@ -59,21 +59,29 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public async Task<AssetResponseDto?> GetNextAsset()
     {
-        var assets = await _pool.GetAssets(1);
-        return assets.Where(asset =>
-            AccountSettings.ExcludedPeople == null || !AccountSettings.ExcludedPeople.Any() ||
-            asset.People == null ||
-            !asset.People.Any(p => Guid.TryParse(p.Id, out var guid) && AccountSettings.ExcludedPeople.Contains(guid)))
-            .FirstOrDefault();
+        var assets = await _pool.GetAssets(25);
+        return assets.Where(IsAssetIncluded).FirstOrDefault();
     }
 
     public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
         var assets = await _pool.GetAssets(25);
-        return assets.Where(asset =>
-            AccountSettings.ExcludedPeople == null || !AccountSettings.ExcludedPeople.Any() ||
-            asset.People == null ||
-            !asset.People.Any(p => Guid.TryParse(p.Id, out var guid) && AccountSettings.ExcludedPeople.Contains(guid)));
+        return assets.Where(IsAssetIncluded);
+    }
+
+    private bool IsAssetIncluded(AssetResponseDto asset)
+    {
+        if (AccountSettings.ExcludedPeople == null || !AccountSettings.ExcludedPeople.Any())
+        {
+            return true;
+        }
+
+        if (asset.People == null)
+        {
+            return true;
+        }
+
+        return !asset.People.Any(p => Guid.TryParse(p.Id, out var guid) && AccountSettings.ExcludedPeople.Contains(guid));
     }
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);
