@@ -130,6 +130,9 @@ Accounts:
     # UUID of People
     People:  # string[]
       - UUID
+    # UUID of excluded People
+    ExcludedPeople: # string[]
+      - UUID
 
   ```
 ### Security

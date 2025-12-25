@@ -86,6 +86,7 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public List<Guid> Albums => _delegate.Albums;
         public List<Guid> ExcludedAlbums => _delegate.ExcludedAlbums;
         public List<Guid> People => _delegate.People;
+        public List<Guid> ExcludedPeople { get; set; } = new List<Guid>();
         public int? Rating => _delegate.Rating;
 
         public void ValidateAndInitialize() { }
