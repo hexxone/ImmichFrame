@@ -59,12 +59,21 @@ public class PooledImmichFrameLogic : IAccountImmichFrameLogic
 
     public async Task<AssetResponseDto?> GetNextAsset()
     {
-        return (await _pool.GetAssets(1)).FirstOrDefault();
+        var assets = await _pool.GetAssets(1);
+        return assets.Where(asset =>
+            AccountSettings.ExcludedPeople == null || !AccountSettings.ExcludedPeople.Any() ||
+            asset.People == null ||
+            !asset.People.Any(p => Guid.TryParse(p.Id, out var guid) && AccountSettings.ExcludedPeople.Contains(guid)))
+            .FirstOrDefault();
     }
 
-    public Task<IEnumerable<AssetResponseDto>> GetAssets()
+    public async Task<IEnumerable<AssetResponseDto>> GetAssets()
     {
-        return _pool.GetAssets(25);
+        var assets = await _pool.GetAssets(25);
+        return assets.Where(asset =>
+            AccountSettings.ExcludedPeople == null || !AccountSettings.ExcludedPeople.Any() ||
+            asset.People == null ||
+            !asset.People.Any(p => Guid.TryParse(p.Id, out var guid) && AccountSettings.ExcludedPeople.Contains(guid)));
     }
 
     public Task<AssetResponseDto> GetAssetInfoById(Guid assetId) => _immichApi.GetAssetInfoAsync(assetId, null);
